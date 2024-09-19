@@ -1,0 +1,75 @@
+version: '3'
+services:
+  redis:
+    image: "redis:latest"
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  authentication:
+    build:
+      context: ./Authentication
+      dockerfile: Dockerfile
+    container_name: authentication
+    ports:
+      - "8001:8001"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/Authentication/node_modules
+    env_file:
+      - ./Authentication/.env
+
+  createquiz:
+    build:
+      context: ./CreateQuiz
+      dockerfile: Dockerfile
+    container_name: createquiz
+    ports:
+      - "8002:8002"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/CreateQuiz/node_modules
+    env_file:
+      - ./CreateQuiz/.env
+
+  historyquiz:
+    build:
+      context: ./HistoryQuiz
+      dockerfile: Dockerfile
+    container_name: historyquiz
+    ports:
+      - "8003:8003"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/HistoryQuiz/node_modules
+    env_file:
+      - ./HistoryQuiz/.env
+
+  quizfeedback:
+    build:
+      context: ./QuizFeedBack
+      dockerfile: Dockerfile
+    container_name: quizfeedback
+    ports:
+      - "8004:8004"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/QuizFeedBack/node_modules
+    env_file:
+      - ./QuizFeedBack/.env
+
+  nginx-proxy:
+    build:
+      dockerfile: Dockerfile
+      context: ./proxy
+    depends_on:
+      - authentication
+      - createquiz
+      - historyquiz
+      - quizfeedback
+    ports:
+      - "80:80"
